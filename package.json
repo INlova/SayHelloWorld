@@ -1,0 +1,16 @@
+{
+	"version": "1.0.0",
+    "name": "say_hello_world",
+    "dependencies": {
+        "d3": "^4.12.0"
+    },
+    "devDependencies": {
+        "webpack": "^3.9.1",
+        "babel-loader": "^7.1.2",
+        "babel-core": "^6.26.0",
+        "babel-preset-es2015": "6.3.13",
+        "webpack-notifier": "^1.5.0",
+        "extract-text-webpack-plugin": "^3.0.2",
+        "uglifyjs-webpack-plugin": "^1.1.2"
+    }
+}
