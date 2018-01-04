@@ -35,12 +35,26 @@ class TranslateService {
                             throw new Error("Unable to get translation. Status code: " + data.code);
                         }
                         return data.text[0];
-                    })
-                    .catch((error) => { /* todo */ });
+                    });
     }
 
-    detect(phrase) {
-        
+    detect(phrase, ...hints) {
+        const request = {
+            key: this.apiKey,
+            text: phrase
+        };
+        if (!!hints && hints.length) {
+            request["hint"] = hints.join(",");
+        }
+        const url = formatUrl("detect", request);
+        return fetch(url, { method: "POST" })
+            .then((response) => response.json())
+            .then((data) => { 
+                if (data.code !== 200) {
+                    throw new Error("Unable to detect the language. Status code: " + data.code);
+                }
+                return data.lang;
+            });
     }
 
 };
