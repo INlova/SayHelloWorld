@@ -2,7 +2,9 @@
 	"version": "1.0.0",
     "name": "say_hello_world",
     "dependencies": {
-        "d3": "^4.12.0"
+        "d3": "^4.12.0",
+        "d3-geo": "^1.9.1",
+        "d3-geo-projection": "^2.3.2"
     },
     "devDependencies": {
         "webpack": "^3.9.1",

@@ -1,2 +1,46 @@
 ﻿body {
+    overflow: hidden;
+    font-weight: 400;
+    font-family: 'Questrial', sans-serif;
 }
+
+.names {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+}
+
+.source {
+    display: block;
+    border: 1px solid grey;
+    border-radius: 4px;
+    padding: 10px 10px;
+    margin: 0 auto;
+    width: 30%;
+}
+
+    .source:focus {
+        border-color: #66afe9;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+    }
+
+/* dummy tooltip */
+.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 150px;
+    padding: 2px;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #FFA500;
+    border-radius: 1px;
+    pointer-events: none;
+}
+
+    .tooltip .details {
+        color: white;
+    }
+
+    .tooltip .main {
+        font-size: 1.5em;
+    }
