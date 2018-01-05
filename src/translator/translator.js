@@ -1,4 +1,5 @@
 ﻿const encode = encodeURIComponent;
+
 const formatUrl = (method, query) => {
     const queryStr = Object.keys(query)
         .map((key) => {
@@ -8,6 +9,11 @@ const formatUrl = (method, query) => {
             return encode(key) + "=" + encode(val);
         }).join("&");
     return `https://translate.yandex.net/api/v1.5/tr.json/${method}?${queryStr}`;
+};
+
+const methodType = {
+    TRANSLATE: "translate",
+    DETECT: "detect"
 };
 
 class TranslateService {
@@ -23,40 +29,34 @@ class TranslateService {
 
     translate(phrase, lang) {
         const request = {
-            key: this.apiKey,
             text: phrase,
             lang: lang
         };
-        const url = formatUrl("translate", request);
-        return fetch(url, { method: "POST" })
-                    .then((response) => response.json())
-                    .then((data) => { 
-                        if (data.code !== 200) {
-                            throw new Error("Unable to get translation. Status code: " + data.code);
-                        }
-                        return data.text[0];
-                    });
+        return this.fetchData(methodType.TRANSLATE, request)
+                   .then((data) => data.text[0]);
     }
 
     detect(phrase, ...hints) {
-        const request = {
-            key: this.apiKey,
-            text: phrase
-        };
+        const request = { text: phrase };
         if (!!hints && hints.length) {
             request["hint"] = hints.join(",");
         }
-        const url = formatUrl("detect", request);
-        return fetch(url, { method: "POST" })
-            .then((response) => response.json())
-            .then((data) => { 
-                if (data.code !== 200) {
-                    throw new Error("Unable to detect the language. Status code: " + data.code);
-                }
-                return data.lang;
-            });
+        return this.fetchData(methodType.DETECT, request)
+                   .then((data) => data.lang);
     }
 
+    fetchData(method, request) {
+        request["key"] = this.apiKey;
+        const url = formatUrl(method, request);
+        return fetch(url, { method: "POST" })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.code !== 200) {
+                        throw new Error(`Failed request for ${method}. Status code: ${data.code}`);
+                    }
+                    return data;
+                });
+    }
 };
 
 export default TranslateService;
