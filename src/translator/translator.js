@@ -24,7 +24,7 @@ class TranslateService {
     }
 
     isSupported(lang) {
-        return (!lang && !this.supportedLangs[lang]);
+        return (!!lang && this.supportedLangs[lang]);
     }
 
     translate(phrase, lang) {
