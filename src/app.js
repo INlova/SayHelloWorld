@@ -2,11 +2,7 @@
 import { geoPath } from "d3-geo";
 import { geoRobinson } from "d3-geo-projection";
 
-import TranslateService from "./translator/translator";
-import { apiKey } from "./translator/settings/api-key";
-import { supportedLangs } from "./translator/settings/supported-langs";
-
-const translator = new TranslateService(apiKey, supportedLangs);
+import { translator } from "./translator/index";
 
 function getSize()
 {
@@ -40,13 +36,20 @@ d3.queue()
     .await(ready);
 
 function ready(error, geography, info) {
+    const data = prepareData(geography, info);
+    const map = initMap(data);
+    prepareMapDecorations();
+    setupInteractions(map);
+    makeResponsive(map);
+}
 
-    // prepare data
+function prepareData(geography, info) {
     const countryLangs = {};
-    Object.keys(info).map((key) => {
-        const item = info[key];
-        countryLangs[item.name] = item.languages;
-    });
+    Object.keys(info)
+        .map((key) => {
+            const item = info[key];
+            countryLangs[item.name] = item.languages;
+        });
 
     geography
         .features
@@ -54,62 +57,108 @@ function ready(error, geography, info) {
             d.languages = countryLangs[d.properties.name] || [];
         });
 
-    var map = svg
-            .append("g")
-            .attr("class", "map-container");
-        
+    return geography;
+}
+
+function prepareMapDecorations() {
+    const defs = svg.append("defs");
+    const pattern = defs
+        .append("svg:pattern")
+            .attr("id", "map_pattern")
+            .attr("width", 4)
+            .attr("height", 4)
+            .attr("patternUnits", "userSpaceOnUse")
+            .attr("patternTransform", "rotate(-45)"); 
+		
+    pattern
+		.append("rect")
+		.attr("width", 3)
+		.attr("height", 4)
+		.attr("transform", "translate(0,0)")
+		.attr("fill", "#99b898");
+
+    const gradient = defs
+      .append("linearGradient")
+        .attr("id", "map_gradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "100%")
+            .attr("spreadMethod", "pad");
+
+    const gradientData = [
+        { color: "#feceab", offset: "0%" },
+        { color: "#ff847c", offset: "20%" },
+        { color: "#e84a5f", offset: "40%" },
+        { color: "#ff847c", offset: "80%" },
+        { color: "#feceab", offset: "100%" }
+    ];
+
+    gradient
+        .selectAll("stop")
+        .data(gradientData).enter()
+            .append("stop")
+            .attr("offset", function (d) { return d.offset; })
+            .attr("stop-color", function (d) { return d.color; })
+            .attr("stop-opacity", 1);
+}
+
+function initMap(geography) {
+    const map = svg
+           .append("g")
+           .attr("class", "map-container");
+
     map.selectAll("path")
-       .data(geography.features).enter()
-          .append("path")
-                .attr("d", path)
-                .style("fill", "grey")
-                .style("fill-opacity", 0.8)
-                .style("stroke", "white")
-                .style("stroke-width", 1)
-                .style("stroke-opacity", 0.5)
-            // tooltips
-            .on("mouseover", function (d) {
-                d3.select(this)
-                    .style("fill", "green")
-                    .style("fill-opacity", 1)
-                    .style("stroke-opacity", 1)
-                    .style("stroke-width", 2);
-                // tooltip fast and dummy
-                const text = d3.select(".source").node().value;
-                tooltip.style("left", (d3.event.pageX) + "px")
-                       .style("top", (d3.event.pageY - 28) + "px");
-                if (!text) {
-                    tooltip.html(() => `
+        .data(geography.features).enter()
+        .append("path")
+            .attr("d", path)
+            .style("fill", "url(#map_gradient)")
+            .style("fill-opacity", 0.7)
+            .style("stroke", "#2a363b")
+            .style("stroke-width", 1);
+
+    return map;
+}
+
+function setupInteractions(map) {
+    map.selectAll("path")
+        .on("mouseover", function (d) {
+               d3.select(this)
+                   .style("fill", "url(#map_gradient)");
+               // tooltip fast and dummy
+               const text = d3.select(".source").node().value;
+               tooltip.style("left", (d3.event.pageX) + "px")
+                      .style("top", (d3.event.pageY - 28) + "px");
+               if (!text) {
+                   tooltip.html(() => `
                             <strong>Country: </strong>
                             <span class='details'>${d.properties.name}<br></span>
                             <strong>Languages: </strong>
                             <span class ='details'>${d.languages.join()} </span>`);
-                    tooltip.transition().duration(200).style("opacity", .9);
-                } else {
-                    translator
-                        .translate(text, d.languages[0]) 
-                        .then((r) => { 
-                            console.log(r);
-                            tooltip.html(() => `
+                   tooltip.transition().duration(200).style("opacity", .9);
+               } else {
+                   translator
+                       .translate(text, d.languages[0]) 
+                       .then((r) => { 
+                           tooltip.html(() => `
                                         <span class='main'>${ r }<br></span>
                                         <strong>Country: </strong>
                                         <span class='details'>${d.properties.name}<br></span>`);
-                            tooltip.transition().duration(200).style("opacity", .9);
-                        },
-                              (r) => { console.log(r);});
-                }
-            })
-            .on("mouseout", function (d) {
-                tooltip.transition()
-                       .duration(500)
-                       .style("opacity", 0);
-                d3.select(this)
-                    .style("fill", "grey")
-                    .style("fill-opacity", 0.8)
-                    .style("stroke-opacity", 0.5)
-                    .style("stroke-width", 1);
-            });
-        
+                           tooltip.transition().duration(200).style("opacity", .9);
+                       });
+               }
+           })
+           .on("mouseout", function (d) {
+               tooltip.transition()
+                      .duration(500)
+                      .style("opacity", 0);
+               d3.select(this)
+                   .style("fill", "url(#map_pattern)")
+                   .style("fill-opacity", 0.7)               ;
+           });
+}
+
+function makeResponsive(map) {
     d3.select(window)
       .on("resize", sizeChanged);
     
