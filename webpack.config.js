@@ -34,7 +34,7 @@ module.exports = {
         ]
     },
     plugins: [
-            //new UglifyJsPlugin(),
+            new UglifyJsPlugin(),
             new WebpackNotifierPlugin()
     ]
 };
