@@ -6,7 +6,7 @@ import { translator } from "./translator/index";
 
 function getSize()
 {
-    const margin = { top: 0, right: 10, bottom: 0, left: 10 };
+    const margin = { top: 0, right: 10, bottom: 30, left: 10 };
     const width = window.innerWidth - margin.left - margin.right;
     const height = Math.max(window.innerHeight, window.innerWidth * 0.5) - margin.top - margin.bottom;
     return { width: width, height: height };
