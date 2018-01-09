@@ -4,6 +4,8 @@ import { geoRobinson } from "d3-geo-projection";
 
 import { translator } from "./translator/index";
 
+import Tooltip from "./ui/tooltip";
+
 function getSize() {
     const margin = { top: 0, right: 10, bottom: 30, left: 10 };
     const width = window.innerWidth - margin.left - margin.right;
@@ -12,11 +14,6 @@ function getSize() {
 }
 
 const initSize = getSize();
-
-const tooltip = d3.select("body")
-    .append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
 
 const svg = d3.select(".map")
     .append("svg")
@@ -28,6 +25,32 @@ const projection = geoRobinson()
     .translate([initSize.width / 2, initSize.height / 2]);
 
 const path = geoPath().projection(projection);
+
+const placeholderFormatter = (d) => `
+                            <strong>Country: </strong>
+                            <span class='details'>${d.properties.name}<br></span>
+                            <strong>Languages: </strong>
+                            <span class ='details'>${d.languages.join()} </span>`;
+
+const translaionFormatter = (d, r) => `
+                             <span class='main'>${r}<br></span>
+                             <strong>Country: </strong>
+                             <span class='details'>${d.properties.name}<br></span>`;
+
+const getTooltipText = function(data) {
+    const text = d3.select(".source").node().value;
+    if (!text) {
+        const placeholder = placeholderFormatter(data);
+        return Promise.resolve(placeholder);
+    } 
+    return translator
+            .translate(text, data.languages[0]) 
+            .then((translation) => {
+                return translaionFormatter(data, translation);
+            });
+}
+
+const tooltip = new Tooltip(getTooltipText);
     
 d3.queue()
     .defer(d3.json, "assets/data/countries_geo.json")
@@ -119,35 +142,11 @@ function setupInteractions(map) {
     map.selectAll("path")
         .on("mouseover", function (d) {
                d3.select(this).style("fill", "url(#map_pattern)");
-               // tooltip fast and dummy
-               const text = d3.select(".source").node().value;
-               tooltip.style("left", (d3.event.pageX) + "px")
-                      .style("top", (d3.event.pageY - 28) + "px");
-               if (!text) {
-                   tooltip.html(() => `
-                            <strong>Country: </strong>
-                            <span class='details'>${d.properties.name}<br></span>
-                            <strong>Languages: </strong>
-                            <span class ='details'>${d.languages.join()} </span>`);
-                   tooltip.transition().duration(200).style("opacity", .9);
-               } else {
-                   translator
-                       .translate(text, d.languages[0]) 
-                       .then((r) => { 
-                           tooltip.html(() => `
-                                        <span class='main'>${ r }<br></span>
-                                        <strong>Country: </strong>
-                                        <span class='details'>${d.properties.name}<br></span>`);
-                           tooltip.transition().duration(200).style("opacity", .9);
-                       });
-               }
-           })
+                tooltip.show(d, d3.event);
+            })
            .on("mouseout", function (d) {
-               tooltip
-                   .transition()
-                      .duration(500)
-                      .style("opacity", 0);
-               d3.select(this)
+                tooltip.hide();
+                d3.select(this)
                    .style("fill", "url(#map_gradient)")
                    .style("fill-opacity", 0.7)               ;
            });
