@@ -4,11 +4,10 @@ import { geoRobinson } from "d3-geo-projection";
 
 import { translator } from "./translator/index";
 
-function getSize()
-{
+function getSize() {
     const margin = { top: 0, right: 10, bottom: 30, left: 10 };
     const width = window.innerWidth - margin.left - margin.right;
-    const height = Math.max(window.innerHeight, window.innerWidth * 0.5) - margin.top - margin.bottom;
+    const height = window.innerHeight - margin.top - margin.bottom;
     return { width: width, height: height };
 }
 
@@ -25,7 +24,7 @@ const svg = d3.select(".map")
     .attr("height", initSize.height);
 
 const projection = geoRobinson()
-    .scale((initSize.width - 1) / 2 / Math.PI)
+    .scale((Math.min(initSize.width, initSize.height * 1.9) - 1) / 2 / Math.PI)
     .translate([initSize.width / 2, initSize.height / 2]);
 
 const path = geoPath().projection(projection);
@@ -165,7 +164,7 @@ function makeResponsive(map) {
            .attr("width", size.width)
            .attr("height", size.height);
         projection
-            .scale((size.width - 1) / 2 / Math.PI)
+            .scale((Math.min(size.width, size.height * 1.9) - 1) / 2 / Math.PI)
             .translate([size.width / 2, size.height / 2]);
         map.selectAll("path").attr("d", path);
     }
