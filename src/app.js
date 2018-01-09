@@ -75,23 +75,21 @@ function prepareMapDecorations() {
 		.attr("width", 3)
 		.attr("height", 4)
 		.attr("transform", "translate(0,0)")
-		.attr("fill", "#99b898");
+		.attr("fill", "#FF9000");
 
     const gradient = defs
-      .append("linearGradient")
+      .append("radialGradient")
         .attr("id", "map_gradient")
             .attr("x1", "0%")
             .attr("y1", "0%")
             .attr("x2", "100%")
             .attr("y2", "100%")
+            .attr("gradientUnits", "userSpaceOnUse")
             .attr("spreadMethod", "pad");
 
     const gradientData = [
-        { color: "#feceab", offset: "0%" },
-        { color: "#ff847c", offset: "20%" },
-        { color: "#e84a5f", offset: "40%" },
-        { color: "#ff847c", offset: "80%" },
-        { color: "#feceab", offset: "100%" }
+        { color: "#F5E7C4", offset: "0%" },
+        { color: "#FECEAB", offset: "100%" }
     ];
 
     gradient
@@ -113,9 +111,7 @@ function initMap(geography) {
         .append("path")
             .attr("d", path)
             .style("fill", "url(#map_gradient)")
-            .style("fill-opacity", 0.7)
-            .style("stroke", "#2a363b")
-            .style("stroke-width", 1);
+            .style("fill-opacity", 0.7);
 
     return map;
 }
@@ -123,8 +119,7 @@ function initMap(geography) {
 function setupInteractions(map) {
     map.selectAll("path")
         .on("mouseover", function (d) {
-               d3.select(this)
-                   .style("fill", "url(#map_gradient)");
+               d3.select(this).style("fill", "url(#map_pattern)");
                // tooltip fast and dummy
                const text = d3.select(".source").node().value;
                tooltip.style("left", (d3.event.pageX) + "px")
@@ -149,11 +144,12 @@ function setupInteractions(map) {
                }
            })
            .on("mouseout", function (d) {
-               tooltip.transition()
+               tooltip
+                   .transition()
                       .duration(500)
                       .style("opacity", 0);
                d3.select(this)
-                   .style("fill", "url(#map_pattern)")
+                   .style("fill", "url(#map_gradient)")
                    .style("fill-opacity", 0.7)               ;
            });
 }
