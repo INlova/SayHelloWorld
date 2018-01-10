@@ -9,7 +9,7 @@ const placeholderFormatter = (d) => `
                             <strong>Country: </strong>
                             <span class='details'>${d.properties.name}<br></span>
                             <strong>Languages: </strong>
-                            <span class ='details'>${d.languages.join()} </span>`;
+                            <span class ='details'>${d.languages.join(", ")} </span>`;
 
 const translaionFormatter = (d, r) => `
                              <span class='main'>${r}<br></span>

@@ -16,10 +16,9 @@ class Tooltip {
     show(data, event) {
         this.getText(data)
             .then((updatedText) => {
-                this.container
-                    .html(updatedText)
-                    .style("left", (event.pageX) + "px")
-                    .style("top", (event.pageY - 28) + "px");
+                this.container.html(updatedText);
+                this.size = this.container.node().getBoundingClientRect();
+                this.move(event);
                 this.container
                     .transition()
                     .duration(200)
@@ -32,6 +31,16 @@ class Tooltip {
             .transition()
                 .duration(500)
             .style("opacity", 0);
+    }
+
+    move(event) {
+        const distToRight = window.innerWidth - event.pageX;
+        const xOffset = distToRight > (this.size.width + 50) ? 10 : (-this.size.width - 10);
+        const distToBottom = window.innerHeight - event.pageY;
+        const yOffset = distToBottom > (this.size.height + 10) ? -30 : (-this.size.height - 10);
+        this.container
+            .style("left", (event.pageX + xOffset)  + "px")
+            .style("top", (event.pageY + yOffset) + "px");
     }
 }
 

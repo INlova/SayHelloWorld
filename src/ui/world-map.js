@@ -107,6 +107,9 @@ class WorldMap {
                    d3.select(this)
                       .style("fill", "url(#map_gradient)")
                       .style("fill-opacity", 0.7);
+               })
+               .on("mousemove", function(d) {
+                   tooltip.move(d3.event);
                });
     }
 

@@ -69,17 +69,17 @@ body {
     stroke-width: 1px;
 }
 
-/* dummy tooltip */
+/* tooltip */
 .tooltip {
     position: absolute;
+    pointer-events: none;
     text-align: center;
     width: 150px;
-    padding: 2px;
     padding: 6px;
-    background: rgba(0, 0, 0, 0.6);
     color: #FF9000;
     border-radius: 1px;
-    pointer-events: none;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 1px 1px 0px 2px rgba(250, 250, 250, 0.3);
 }
 
     .tooltip .details {
