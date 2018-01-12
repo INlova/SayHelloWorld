@@ -1,6 +1,7 @@
 ﻿html {
     background: #222222;
     background: radial-gradient(#222 0%, #000 65%);
+    height: 100%;
 }
 
 body {
